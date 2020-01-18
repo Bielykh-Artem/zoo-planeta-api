@@ -60,7 +60,14 @@ const editSupplierById = async ctx => {
 }
 
 const removeSupplierById = async ctx => {
-  // TODO
+  const { supplierId } = ctx.params
+
+  try {
+    const updatedSupplier = await Supplier.findByIdAndUpdate({ _id: supplierId }, { isArchived: true }, {new: true})
+		ctx.body = updatedSupplier
+  } catch(err) {
+    ctx.throw(err)
+  }
 }
 
 const removeSuppliers = async ctx => {

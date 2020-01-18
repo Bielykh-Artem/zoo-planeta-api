@@ -8,7 +8,7 @@ const userSchema = new Schema({
   },
   onModel: {
     type: String,
-    enum: ['Supplier']
+    enum: ['Supplier', 'Price', 'Product', 'Group', 'Brand', 'Menu', 'Banner', 'Characteristic']
   },
   createdAt: { type: Date, default: Date.now },
   email: { type: String, required: true },

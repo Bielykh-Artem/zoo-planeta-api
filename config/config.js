@@ -2,7 +2,7 @@ require('dotenv').config()
 
 const _ = require('lodash')
 
-const NODE_PORT = process.env.PORT || 4001
+const NODE_PORT = process.env.PORT || 4002
 
 const config = {
   development: {
