@@ -1,7 +1,7 @@
 const Router = require('koa-router')
 const router = new Router({ prefix: '/prices' })
 
-const Ctrl = require('../controllers/price')
+const Ctrl = require('../../controllers/price')
 
 router.get('/', Ctrl.fetchPrices)
 router.post('/', Ctrl.bulkWritePrice)

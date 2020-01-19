@@ -8,7 +8,7 @@ const userSchema = new Schema({
   },
   onModel: {
     type: String,
-    enum: ['Supplier', 'Price', 'Product', 'Group', 'Brand', 'Menu', 'Banner', 'Characteristic']
+    enum: ['Supplier', 'Price', 'Product', 'Group', 'Brand', 'Menu', 'Banner', 'Characteristic', 'Order', 'Dashboard']
   },
   createdAt: { type: Date, default: Date.now },
   email: { type: String, required: true },
@@ -16,7 +16,7 @@ const userSchema = new Schema({
   firstName: { type: String, default: '' },
   lastName: { type: String, default: '' },
   active: { type: Boolean, default: false, required: true },
-  role: { type: Array, default: [0] },
+  role: { type: Number, default: 4 },
 })
 
 module.exports = mongoose.model('User', userSchema)

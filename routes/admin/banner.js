@@ -1,7 +1,7 @@
 const Router = require('koa-router')
 const router = new Router({ prefix: '/banners' })
 
-const Ctrl = require('../controllers/banner')
+const Ctrl = require('../../controllers/banner')
 
 router.get('/', Ctrl.fetchBanners)
 router.post('/', Ctrl.addNewBanner)

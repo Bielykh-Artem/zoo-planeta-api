@@ -10,8 +10,9 @@ const BearerToken = require('koa-bearer-token')
 const middleware = require('./middleware')
 
 const app = new Koa()
-const publicRouter = new Router({ prefix: '/api' })
-const privateRouter = new Router({ prefix: '/api' })
+const publicRouter = new Router({ prefix: '/api/v1' })
+const privateRouter = new Router({ prefix: '/api/v1' })
+const publicShopRouter = new Router({ prefix: '/api/v2' })
 
 app.use(BodyParser({
   formLimit: "50mb",
@@ -23,14 +24,14 @@ app.use(logger())
 app.use(cors())
 
 privateRouter.use(middleware.requireAuth)
-require('./routes')(privateRouter, publicRouter)
+require('./routes/admin')(privateRouter, publicRouter)
 
 mongoose.connect(global.gConfig.db_url, { useNewUrlParser: true, useUnifiedTopology: true })
 mongoose.Promise = global.Promise
 
 app
-  .use(publicRouter.routes())
   .use(privateRouter.routes())
+  .use(publicRouter.routes())
   .use(publicRouter.allowedMethods())
 
 app.listen(global.gConfig.node_port, () => console.log(`Listening port ${global.gConfig.node_port}`))
