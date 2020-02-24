@@ -102,7 +102,62 @@ const updateProduct = async ctx => {
   }
 }
 
+const fetchProductsForShop = async ctx => {
+  const { skip, limit, search = '', is_new, popular } = ctx.query
+  const fields = ['name']
+  const productOptions = {
+    isArchived: false
+  }
+
+  const priceOptions = {
+    isArchived: false
+  }
+
+  try {
+    const aggregateQuery = [
+      { $match: {
+        $and: [productOptions],
+        $or: fields.map(field => ({ [field]: { $regex: search, $options: 'ig' } })) },
+      },
+      { $lookup: {
+        from: 'prices',
+        let: { product_price: "$price" },
+        pipeline: [
+          { $match:
+              { $expr:
+                  { $and:
+                    [
+                      { $eq: [ "$_id", "$$product_price"] },
+                      priceOptions
+                    ]
+                  }
+              }
+          },
+        ],
+        as: 'price_doc' }
+      },
+      { $skip: skip * limit },
+      { $limit: Number(limit) },
+    ]
+
+    if (is_new) {
+      aggregateQuery.unshift({ "$sort": { createdAt: 1 } })
+    }
+  
+    if (popular) {
+      aggregateQuery.unshift({ "$sort": { "price_doc.orderCount": 1 } })
+    }
+
+    const products = await Product.aggregate(aggregateQuery)
+
+    ctx.body = products
+  } catch(err) {
+    ctx.throw(err)
+  }
+}
+
 module.exports = {
   fetchProducts,
+  fetchProductsForShop,
   updateProduct
 }

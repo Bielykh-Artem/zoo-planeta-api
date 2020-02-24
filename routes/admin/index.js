@@ -1,4 +1,4 @@
-module.exports = (privateRouter, publicRouter, publicShopRouter) => {
+module.exports = (privateRouter, publicRouter) => {
   privateRouter.use(require('../admin/supplier'))
   privateRouter.use(require('../admin/price'))
   privateRouter.use(require('../admin/brand'))

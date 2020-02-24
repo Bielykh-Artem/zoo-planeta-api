@@ -2,7 +2,7 @@ const Banner = require('../models/banner')
 const ObjectId = require('mongodb').ObjectID
 
 const fetchBanners = async ctx => {
-  const { skip, limit, search } =  ctx.query
+  const { skip, limit = 1000000, search = '' } =  ctx.query
   const fields = ['title']
 
   const options = {

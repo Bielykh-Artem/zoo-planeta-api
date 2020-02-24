@@ -25,6 +25,7 @@ app.use(cors())
 
 privateRouter.use(middleware.requireAuth)
 require('./routes/admin')(privateRouter, publicRouter)
+require('./routes/shop')(publicShopRouter)
 
 mongoose.connect(global.gConfig.db_url, { useNewUrlParser: true, useUnifiedTopology: true })
 mongoose.Promise = global.Promise
@@ -32,6 +33,7 @@ mongoose.Promise = global.Promise
 app
   .use(privateRouter.routes())
   .use(publicRouter.routes())
+  .use(publicShopRouter.routes())
   .use(publicRouter.allowedMethods())
 
 app.listen(global.gConfig.node_port, () => console.log(`Listening port ${global.gConfig.node_port}`))
