@@ -4,6 +4,16 @@ const PRICE_ITEM_TYPES = {
   NEW: 2,
 }
 
+const ORDER_STATUSES = {
+  NEW: 0,
+  PROCESSING: 1,
+  DELIVERY: 2,
+  SHIPMENT: 3,
+  COMPLETED: 4,
+  CANCELED: 5,
+}
+
 module.exports = {
-  PRICE_ITEM_TYPES
+  PRICE_ITEM_TYPES,
+  ORDER_STATUSES,
 }

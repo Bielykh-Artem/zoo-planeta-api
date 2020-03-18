@@ -4,9 +4,9 @@ const ObjectId = require('mongodb').ObjectID
 
 const fetchMenuTree = async ctx => {
   try {
-    const menuTree = await Menu.find()
+    const menuTree = await Menu.find().sort({ order: 1 })
     ctx.body = menuTree
-  } catch(err) {
+  } catch (err) {
     ctx.throw(err)
   }
 }
@@ -30,7 +30,7 @@ const prepareMenuTreeBeforeSave = async menuTreeData => {
 const updateMenuTree = async ctx => {
   const menuTreeData = ctx.request.body
   const { user } = ctx.decoded
-  
+
   const prepareMenuTree = await prepareMenuTreeBeforeSave(menuTreeData)
 
   try {
@@ -42,20 +42,20 @@ const updateMenuTree = async ctx => {
           updateOne: {
             filter: { _id: item._id },
             update: { $set: item },
-            upsert: true
-          }
+            upsert: true,
+          },
         }
       })
     )
 
     const foundMenuTree = await Menu.find()
     ctx.body = foundMenuTree
-  } catch(err) {
+  } catch (err) {
     ctx.throw(err)
   }
 }
 
 module.exports = {
   fetchMenuTree,
-  updateMenuTree
+  updateMenuTree,
 }

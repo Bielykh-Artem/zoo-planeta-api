@@ -4,11 +4,23 @@ const Schema = mongoose.Schema
 const userSchema = new Schema({
   _id: {
     type: Schema.Types.ObjectId,
-    refPath: 'onModel'
+    refPath: 'onModel',
   },
   onModel: {
     type: String,
-    enum: ['Supplier', 'Price', 'Product', 'Group', 'Brand', 'Menu', 'Banner', 'Characteristic', 'Order', 'Dashboard']
+    enum: [
+      'Supplier',
+      'Price',
+      'Product',
+      'Group',
+      'Brand',
+      'Menu',
+      'Banner',
+      'Characteristic',
+      'order',
+      'Dashboard',
+      'order_product',
+    ],
   },
   createdAt: { type: Date, default: Date.now },
   email: { type: String, required: true },

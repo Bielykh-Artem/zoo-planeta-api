@@ -5,11 +5,11 @@ const Schema = mongoose.Schema
 const supplierSchema = new Schema({
   _id: {
     type: Schema.Types.ObjectId,
-    refPath: 'onModel'
+    refPath: 'onModel',
   },
   onModel: {
     type: String,
-    enum: ['Price']
+    enum: ['Price', 'Group', 'Product'],
   },
   createdAt: { type: Date, default: Date.now },
   createdBy: { type: Schema.ObjectId, ref: 'User', required: true },
