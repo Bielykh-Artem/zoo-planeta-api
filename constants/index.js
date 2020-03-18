@@ -11,6 +11,7 @@ const ORDER_STATUSES = {
   SHIPMENT: 3,
   COMPLETED: 4,
   CANCELED: 5,
+  MONEYBACK: 6,
 }
 
 module.exports = {

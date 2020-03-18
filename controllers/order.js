@@ -1,6 +1,7 @@
 const Order = require('../models/order')
 const ObjectId = require('mongodb').ObjectID
 const Employee = require('../models/employee')
+const Product = require('../models/product')
 const OrderProduct = require('../models/orderProduct')
 const utils = require('../utils')
 
@@ -8,15 +9,28 @@ const fetchOrders = async ctx => {
   const { skip, limit, search } = ctx.query
   const fields = ['orderNumber', 'status', 'city'] // employee phoneNumber, employee userName, employee email
 
-  const options = {
-    isArchived: false,
-  }
-
   const aggregateQuery = [
     {
       $match: {
-        $and: [options],
+        $and: [{ isArchived: false }],
         $or: fields.map(field => ({ [field]: { $regex: search, $options: 'ig' } })),
+      },
+    },
+    {
+      $lookup: {
+        from: 'employees',
+        let: { order_employees: '$employee' },
+        pipeline: [{ $match: { $expr: { $and: [{ $eq: ['$_id', '$$order_employees'] }, { isArchived: false }] } } }],
+        as: 'employee',
+      },
+    },
+    { $unwind: '$employee' },
+    {
+      $lookup: {
+        from: 'order_products',
+        localField: 'orderProducts',
+        foreignField: '_id',
+        as: 'orderProducts',
       },
     },
     { $skip: skip * limit },
@@ -25,6 +39,39 @@ const fetchOrders = async ctx => {
 
   try {
     const orders = await Order.aggregate(aggregateQuery)
+
+    await Promise.all(
+      orders.map(async order => {
+        await Promise.all(
+          order.orderProducts.map(async orderProduct => {
+            const productAggregateQuery = [
+              {
+                $match: { _id: orderProduct.product },
+              },
+              {
+                $lookup: {
+                  from: 'prices',
+                  let: { product_price: '$price' },
+                  pipeline: [
+                    { $match: { $expr: { $and: [{ $eq: ['$_id', '$$product_price'] }, { isArchived: false }] } } },
+                  ],
+                  as: 'price',
+                },
+              },
+              { $unwind: '$price' },
+            ]
+
+            const foundOrderProduct = await Product.aggregate(productAggregateQuery)
+            orderProduct.product = foundOrderProduct
+
+            return orderProduct
+          })
+        )
+
+        return order
+      })
+    )
+
     ctx.body = orders
   } catch (err) {
     ctx.throw(err)
@@ -60,8 +107,10 @@ const addNewOrder = async ctx => {
 
     await Promise.all(
       products.map(async ({ _id, count }) => {
+        const product = await Product.findOne({ price: _id })
+
         const orderProduct = {
-          product: _id,
+          product: product._id,
           count,
           employee: savedEmployee._id,
         }
