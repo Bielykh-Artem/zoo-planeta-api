@@ -6,21 +6,36 @@ const OrderProduct = require('../models/orderProduct')
 const utils = require('../utils')
 
 const fetchOrders = async ctx => {
-  const { skip, limit, search } = ctx.query
-  const fields = ['orderNumber', 'status', 'city'] // employee phoneNumber, employee userName, employee email
+  const { skip, limit, search, supplier, startDate, endDate } = ctx.query
+  const fields = ['orderNumber', 'status', 'city']
+  const employeeFields = ['employee.userName', 'employee.email', 'employee.phoneNumber']
+
+  const options = {
+    isArchived: false,
+  }
+
+  if (supplier) {
+    options.supplier = new ObjectId(supplier)
+  }
+
+  if (startDate && endDate) {
+    options.createdAt = { '$gte': new Date(startDate), '$lt': new Date(endDate) }
+  }
 
   const aggregateQuery = [
-    {
-      $match: {
-        $and: [{ isArchived: false }],
-        $or: fields.map(field => ({ [field]: { $regex: search, $options: 'ig' } })),
-      },
-    },
     {
       $lookup: {
         from: 'employees',
         let: { order_employees: '$employee' },
-        pipeline: [{ $match: { $expr: { $and: [{ $eq: ['$_id', '$$order_employees'] }, { isArchived: false }] } } }],
+        pipeline: [
+          {
+            $match: {
+              $expr: {
+                $and: [{ $eq: ['$_id', '$$order_employees'] }, { isArchived: false }],
+              },
+            },
+          },
+        ],
         as: 'employee',
       },
     },
@@ -31,6 +46,12 @@ const fetchOrders = async ctx => {
         localField: 'orderProducts',
         foreignField: '_id',
         as: 'orderProducts',
+      },
+    },
+    {
+      $match: {
+        $and: [options],
+        $or: [...fields, ...employeeFields].map(field => ({ [field]: { $regex: search, $options: 'ig' } })),
       },
     },
     { $skip: skip * limit },
