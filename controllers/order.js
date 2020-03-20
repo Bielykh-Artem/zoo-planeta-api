@@ -6,7 +6,7 @@ const OrderProduct = require('../models/orderProduct')
 const utils = require('../utils')
 
 const fetchOrders = async ctx => {
-  const { skip, limit, search, supplier, startDate, endDate } = ctx.query
+  const { skip, limit, search, supplier, startDate, endDate, status } = ctx.query
   const fields = ['orderNumber', 'status', 'city']
   const employeeFields = ['employee.userName', 'employee.email', 'employee.phoneNumber']
 
@@ -16,6 +16,10 @@ const fetchOrders = async ctx => {
 
   if (supplier) {
     options.supplier = new ObjectId(supplier)
+  }
+
+  if (status) {
+    options.status = Number(status)
   }
 
   if (startDate && endDate) {
