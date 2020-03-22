@@ -14,7 +14,7 @@ const employeeSchema = new Schema({
   createdAt: { type: Date, default: Date.now },
   createdBy: { type: Schema.ObjectId, ref: 'User' },
   userName: { type: String, required: true },
-  email: { type: String, required: true },
+  email: { type: String },
   phoneNumber: { type: String, required: true },
   isArchived: { type: Boolean, required: true, default: false },
 })

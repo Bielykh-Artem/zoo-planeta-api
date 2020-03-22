@@ -102,6 +102,7 @@ const fetchOrders = async ctx => {
     ctx.throw(err)
   }
 }
+
 const addNewOrder = async ctx => {
   const orderProducts = []
   const { body } = ctx.request
@@ -110,7 +111,7 @@ const addNewOrder = async ctx => {
   const employee = { userName, email, phoneNumber }
 
   if (ctx.decoded && ctx.decoded.user) {
-    employee.createdBy = user._id
+    employee.createdBy = ctx.decoded.user._id
   }
 
   try {
@@ -132,16 +133,37 @@ const addNewOrder = async ctx => {
 
     await Promise.all(
       products.map(async ({ _id, count }) => {
-        const product = await Product.findOne({ price: _id })
+        const aggregateProductQuery = [
+          {
+            $match: {
+              $and: [{ isArchived: false }],
+            },
+          },
+          {
+            $lookup: {
+              from: 'prices',
+              let: { product_price: '$price' },
+              pipeline: [
+                { $match: { $expr: { $and: [{ $eq: ['$_id', '$$product_price'] }, { isArchived: false, _id }] } } },
+              ],
+              as: 'price',
+            },
+          },
+          { $unwind: '$price' },
+          { $limit: 1 },
+        ]
+
+        const product = await Product.aggregate(aggregateProductQuery)
 
         const orderProduct = {
-          product: product._id,
+          product: product[0]._id,
           count,
+          sellingPrice: product[0].price.retailPrice,
           employee: savedEmployee._id,
         }
 
         if (ctx.decoded && ctx.decoded.user) {
-          orderProduct.createdBy = user._id
+          orderProduct.createdBy = ctx.decoded.user._id
         }
 
         const newOrderProduct = new OrderProduct({
@@ -161,7 +183,7 @@ const addNewOrder = async ctx => {
 
     const newOrder = new Order({
       ...body,
-      status: 1,
+      status: 0,
       orderProducts,
       employee: savedEmployee._id,
       orderNumber: utils.getUID(),
@@ -179,7 +201,75 @@ const addNewOrder = async ctx => {
     ctx.throw(err)
   }
 }
-const editOrderById = async ctx => {}
+const editOrderById = async ctx => {
+  const { body } = ctx.request
+  const { orderProducts, _id } = body
+  const updatedOrderProducts = []
+
+  try {
+    /**
+     * Move to archive all assigned products in order
+     */
+
+    const foundOrder = await Order.findOne({ _id })
+
+    await Promise.all(
+      foundOrder.orderProducts.map(async _orderProduct => {
+        await OrderProduct.findByIdAndUpdate({ _id: _orderProduct._id }, { isArchived: true })
+      })
+    )
+
+    await Promise.all(
+      orderProducts.map(async orderProduct => {
+        const { count, sellingPrice, employee, product, discount } = orderProduct
+
+        if (employee) {
+          /**
+           * Update exist product in order
+           */
+          await OrderProduct.findByIdAndUpdate(
+            { _id: orderProduct._id },
+            { count, sellingPrice, discount: Number(discount), isArchived: false }
+          )
+          updatedOrderProducts.push(orderProduct._id)
+        } else {
+          /**
+           * Add new product to order
+           */
+          const orderProduct = {
+            product: product[0]._id,
+            count,
+            sellingPrice,
+            discount: Number(discount),
+            employee: body.employee._id,
+          }
+
+          if (ctx.decoded && ctx.decoded.user) {
+            orderProduct.createdBy = ctx.decoded.user._id
+          }
+
+          const newOrderProduct = new OrderProduct({
+            ...orderProduct,
+          })
+
+          orderProduct._id = new ObjectId()
+          const savedOrderProduct = await newOrderProduct.save()
+          updatedOrderProducts.push(savedOrderProduct._id)
+        }
+      })
+    )
+
+    const foundUpdatedOrder = await Order.findByIdAndUpdate(
+      { _id },
+      { orderProducts: updatedOrderProducts },
+      { new: true }
+    )
+    ctx.body = foundUpdatedOrder
+  } catch (err) {
+    console.log('err', err)
+    ctx.throw(err)
+  }
+}
 
 module.exports = {
   fetchOrders,

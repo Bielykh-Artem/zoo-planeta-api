@@ -7,6 +7,8 @@ const orderSchema = new Schema({
   createdBy: { type: Schema.ObjectId, ref: 'User' },
   product: { type: Schema.ObjectId, ref: 'Product' },
   count: { type: Number, default: 1, required: true },
+  sellingPrice: { type: String, required: true },
+  discount: { type: Number, required: true, default: 0 },
   employee: { type: Schema.ObjectId, ref: 'Employee' },
   isArchived: { type: Boolean, required: true, default: false },
 })

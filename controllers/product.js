@@ -3,7 +3,7 @@ const Group = require('../models/group')
 const ObjectId = require('mongodb').ObjectID
 
 const fetchProducts = async ctx => {
-  const { skip, limit, search, completed, supplier } = ctx.query
+  const { skip = 0, limit = 1000000, search = '', completed, supplier } = ctx.query
   const fields = ['name']
   const populate = ['price']
 
@@ -47,17 +47,20 @@ const fetchProducts = async ctx => {
                     from: 'users',
                     let: { supplier_user: '$createdBy' },
                     pipeline: [{ $match: { $expr: { $and: [{ $eq: ['$_id', '$$supplier_user'] }] } } }],
-                    as: 'created_by_user',
+                    as: 'createdBy',
                   },
                 },
+                { $unwind: '$createdBy' },
               ],
-              as: 'supplier_doc',
+              as: 'supplier',
             },
           },
+          { $unwind: '$supplier' },
         ],
-        as: 'price_doc',
+        as: 'price',
       },
     },
+    { $unwind: '$price' },
     { $skip: skip * limit },
     { $limit: Number(limit) },
   ]
