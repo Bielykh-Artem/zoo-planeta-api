@@ -1,5 +1,5 @@
 const getUID = () => {
-  const uniqNumber = new Date().getTime() + Math.floor(Math.random() * 100)
+  const uniqNumber = Math.floor(100000 + Math.random() * 900000)
   return uniqNumber
 }
 

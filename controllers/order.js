@@ -1,6 +1,7 @@
 const Order = require('../models/order')
 const ObjectId = require('mongodb').ObjectID
 const Employee = require('../models/employee')
+const User = require('../models/user')
 const Product = require('../models/product')
 const OrderProduct = require('../models/orderProduct')
 const utils = require('../utils')
@@ -67,6 +68,10 @@ const fetchOrders = async ctx => {
 
     await Promise.all(
       orders.map(async order => {
+        if (order.createdBy) {
+          order.createdBy = await User.findOne({ _id: order.createdBy })
+        }
+
         await Promise.all(
           order.orderProducts.map(async orderProduct => {
             const productAggregateQuery = [
@@ -79,6 +84,26 @@ const fetchOrders = async ctx => {
                   let: { product_price: '$price' },
                   pipeline: [
                     { $match: { $expr: { $and: [{ $eq: ['$_id', '$$product_price'] }, { isArchived: false }] } } },
+                    {
+                      $lookup: {
+                        from: 'suppliers',
+                        let: { price_supplier: '$supplier' },
+                        pipeline: [
+                          { $match: { $expr: { $and: [{ $eq: ['$_id', '$$price_supplier'] }] } } },
+                          {
+                            $lookup: {
+                              from: 'users',
+                              let: { supplier_user: '$createdBy' },
+                              pipeline: [{ $match: { $expr: { $and: [{ $eq: ['$_id', '$$supplier_user'] }] } } }],
+                              as: 'createdBy',
+                            },
+                          },
+                          { $unwind: '$createdBy' },
+                        ],
+                        as: 'supplier',
+                      },
+                    },
+                    { $unwind: '$supplier' },
                   ],
                   as: 'price',
                 },
@@ -190,7 +215,7 @@ const addNewOrder = async ctx => {
     })
 
     if (ctx.decoded && ctx.decoded.user) {
-      newOrder.createdBy = user._id
+      newOrder.createdBy = ctx.decoded.user._id
     }
 
     newOrder._id = new ObjectId()
@@ -198,6 +223,7 @@ const addNewOrder = async ctx => {
     const savedOrder = await newOrder.save()
     ctx.body = savedOrder
   } catch (err) {
+    console.log('err', err)
     ctx.throw(err)
   }
 }
@@ -259,14 +285,29 @@ const editOrderById = async ctx => {
       })
     )
 
+    const updated = { ...body }
+    delete updated.employee
+    delete updated.createdBy
+
+    /**
+     * Update employee info
+     */
+
+    const { userName, email, phoneNumber } = updated
+
+    await Employee.findByIdAndUpdate({ _id: body.employee._id }, { userName, email, phoneNumber })
+
+    /**
+     * Update order info
+     */
+
     const foundUpdatedOrder = await Order.findByIdAndUpdate(
       { _id },
-      { orderProducts: updatedOrderProducts },
+      { ...updated, orderProducts: updatedOrderProducts },
       { new: true }
     )
     ctx.body = foundUpdatedOrder
   } catch (err) {
-    console.log('err', err)
     ctx.throw(err)
   }
 }
