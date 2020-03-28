@@ -9,7 +9,7 @@ const orderSchema = new Schema({
   count: { type: Number, default: 1, required: true },
   sellingPrice: { type: String, required: true },
   discount: { type: Number, required: true, default: 0 },
-  employee: { type: Schema.ObjectId, ref: 'Employee' },
+  client: { type: Schema.ObjectId, ref: 'Client' },
   isArchived: { type: Boolean, required: true, default: false },
 })
 

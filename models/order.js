@@ -16,10 +16,8 @@ const orderSchema = new Schema({
   createdBy: { type: Schema.ObjectId, ref: 'User' },
   isArchived: { type: Boolean, required: true, default: false },
   orderProducts: [{ type: Schema.ObjectId, ref: 'order_product', required: true }],
-  employee: { type: Schema.ObjectId, ref: 'Employee' },
+  client: { type: Schema.ObjectId, ref: 'Client' },
   orderNumber: { type: Number, required: true },
 })
 
 module.exports = mongoose.model('order', orderSchema)
-
-// Customer: username, phoneNumber, email

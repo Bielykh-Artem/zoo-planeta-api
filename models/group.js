@@ -13,7 +13,6 @@ const groupSchema = new Schema({
   },
   createdAt: { type: Date, default: Date.now },
   createdBy: { type: Schema.ObjectId, ref: 'User', required: true },
-  // mainProduct: { type: Schema.ObjectId, ref: 'Product', required: true },
   supplierId: { type: Schema.ObjectId, ref: 'Supplier', required: true },
   products: [{ type: Schema.ObjectId, ref: 'Product', required: true }],
   isArchived: { type: Boolean, required: true, default: false },

@@ -67,7 +67,6 @@ const fetchProducts = async ctx => {
 
   try {
     const products = await Product.aggregate(aggregateQuery)
-
     ctx.body = products
   } catch (err) {
     ctx.throw(err)
@@ -90,7 +89,7 @@ const fetchProductsForShop = async ctx => {
   const { skip, limit, search = '', is_new, popular } = ctx.query
   const fields = ['name']
   const productOptions = {
-    isArchived: false,
+    isCompleted: true,
   }
 
   const priceOptions = {
@@ -132,7 +131,7 @@ const fetchProductsForShop = async ctx => {
     }
 
     if (popular) {
-      aggregateQuery.unshift({ '$sort': { 'price_doc.orderCount': 1 } })
+      aggregateQuery.unshift({ '$sort': { 'price.orderCount': 1 } })
     }
 
     const products = await Product.aggregate(aggregateQuery)
@@ -172,8 +171,10 @@ const fetchProductsForShop = async ctx => {
       })
     )
 
+    console.log('products', products)
     ctx.body = products
   } catch (err) {
+    console.log('err', err)
     ctx.throw(err)
   }
 }
@@ -211,7 +212,7 @@ const groupProducts = async ctx => {
   }
 }
 
-const grtGroupedProducts = async ctx => {
+const getGroupedProducts = async ctx => {
   const { supplierId } = ctx.params
 
   try {
@@ -228,5 +229,5 @@ module.exports = {
   fetchProductsForShop,
   updateProduct,
   groupProducts,
-  grtGroupedProducts,
+  getGroupedProducts,
 }

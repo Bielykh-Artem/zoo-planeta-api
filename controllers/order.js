@@ -1,6 +1,6 @@
 const Order = require('../models/order')
 const ObjectId = require('mongodb').ObjectID
-const Employee = require('../models/employee')
+const Client = require('../models/client')
 const User = require('../models/user')
 const Product = require('../models/product')
 const OrderProduct = require('../models/orderProduct')
@@ -9,7 +9,7 @@ const utils = require('../utils')
 const fetchOrders = async ctx => {
   const { skip, limit, search, supplier, startDate, endDate, status } = ctx.query
   const fields = ['orderNumber', 'status', 'city']
-  const employeeFields = ['employee.userName', 'employee.email', 'employee.phoneNumber']
+  const clientFields = ['client.userName', 'client.email', 'client.phoneNumber']
 
   const options = {
     isArchived: false,
@@ -30,21 +30,21 @@ const fetchOrders = async ctx => {
   const aggregateQuery = [
     {
       $lookup: {
-        from: 'employees',
-        let: { order_employees: '$employee' },
+        from: 'clients',
+        let: { order_clients: '$client' },
         pipeline: [
           {
             $match: {
               $expr: {
-                $and: [{ $eq: ['$_id', '$$order_employees'] }, { isArchived: false }],
+                $and: [{ $eq: ['$_id', '$$order_clients'] }, { isArchived: false }],
               },
             },
           },
         ],
-        as: 'employee',
+        as: 'client',
       },
     },
-    { $unwind: '$employee' },
+    { $unwind: '$client' },
     {
       $lookup: {
         from: 'order_products',
@@ -56,7 +56,7 @@ const fetchOrders = async ctx => {
     {
       $match: {
         $and: [options],
-        $or: [...fields, ...employeeFields].map(field => ({ [field]: { $regex: search, $options: 'ig' } })),
+        $or: [...fields, ...clientFields].map(field => ({ [field]: { $regex: search, $options: 'ig' } })),
       },
     },
     { $skip: skip * limit },
@@ -133,24 +133,24 @@ const addNewOrder = async ctx => {
   const { body } = ctx.request
 
   const { userName, email, phoneNumber, products } = body
-  const employee = { userName, email, phoneNumber }
+  const client = { userName, email, phoneNumber }
 
   if (ctx.decoded && ctx.decoded.user) {
-    employee.createdBy = ctx.decoded.user._id
+    client.createdBy = ctx.decoded.user._id
   }
 
   try {
     /**
-     * Create New Employee
+     * Create New client
      */
 
-    const newEmployee = new Employee({
-      ...employee,
+    const newClient = new Client({
+      ...client,
     })
 
-    newEmployee._id = new ObjectId()
+    newClient._id = new ObjectId()
 
-    const savedEmployee = await newEmployee.save()
+    const savedClient = await newClient.save()
 
     /**
      * Save products with count
@@ -184,7 +184,7 @@ const addNewOrder = async ctx => {
           product: product[0]._id,
           count,
           sellingPrice: product[0].price.retailPrice,
-          employee: savedEmployee._id,
+          client: savedClient._id,
         }
 
         if (ctx.decoded && ctx.decoded.user) {
@@ -210,7 +210,7 @@ const addNewOrder = async ctx => {
       ...body,
       status: 0,
       orderProducts,
-      employee: savedEmployee._id,
+      client: savedClient._id,
       orderNumber: utils.getUID(),
     })
 
@@ -223,7 +223,6 @@ const addNewOrder = async ctx => {
     const savedOrder = await newOrder.save()
     ctx.body = savedOrder
   } catch (err) {
-    console.log('err', err)
     ctx.throw(err)
   }
 }
@@ -247,9 +246,9 @@ const editOrderById = async ctx => {
 
     await Promise.all(
       orderProducts.map(async orderProduct => {
-        const { count, sellingPrice, employee, product, discount } = orderProduct
+        const { count, sellingPrice, client, product, discount } = orderProduct
 
-        if (employee) {
+        if (client) {
           /**
            * Update exist product in order
            */
@@ -267,7 +266,7 @@ const editOrderById = async ctx => {
             count,
             sellingPrice,
             discount: Number(discount),
-            employee: body.employee._id,
+            client: body.client._id,
           }
 
           if (ctx.decoded && ctx.decoded.user) {
@@ -286,16 +285,16 @@ const editOrderById = async ctx => {
     )
 
     const updated = { ...body }
-    delete updated.employee
+    delete updated.client
     delete updated.createdBy
 
     /**
-     * Update employee info
+     * Update client info
      */
 
     const { userName, email, phoneNumber } = updated
 
-    await Employee.findByIdAndUpdate({ _id: body.employee._id }, { userName, email, phoneNumber })
+    await Client.findByIdAndUpdate({ _id: body.client._id }, { userName, email, phoneNumber })
 
     /**
      * Update order info
