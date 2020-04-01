@@ -3,6 +3,14 @@ const mongoose = require('mongoose')
 const Schema = mongoose.Schema
 
 const brandSchema = new Schema({
+  _id: {
+    type: Schema.Types.ObjectId,
+    refPath: 'onModel',
+  },
+  onModel: {
+    type: String,
+    enum: ['Product'],
+  },
   createdAt: { type: Date, default: Date.now },
   createdBy: { type: Schema.ObjectId, ref: 'User', required: true },
   name: { type: String, required: true },

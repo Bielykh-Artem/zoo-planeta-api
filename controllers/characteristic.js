@@ -2,7 +2,7 @@ const Characteristic = require('../models/characteristic')
 const ObjectId = require('mongodb').ObjectID
 
 const fetchCharacteristics = async ctx => {
-  const { skip, limit, search } =  ctx.query
+  const { skip = 0, limit = 100000, search = '' } = ctx.query
   const fields = ['name']
 
   const options = {
@@ -10,9 +10,11 @@ const fetchCharacteristics = async ctx => {
   }
 
   const aggregateQuery = [
-    { $match: {
-      $and: [options],
-      $or: fields.map(field => ({ [field]: { $regex: search, $options: 'ig' } })) },
+    {
+      $match: {
+        $and: [options],
+        $or: fields.map(field => ({ [field]: { $regex: search, $options: 'ig' } }))
+      },
     },
     { $skip: skip * limit },
     { $limit: Number(limit) },
@@ -57,7 +59,7 @@ const addNewCharacteristic = async ctx => {
     const savedCharacteristic = await newCharacteristic.save()
     ctx.body = savedCharacteristic
 
-  } catch(err) {
+  } catch (err) {
     ctx.throw(err)
   }
 }
@@ -66,9 +68,9 @@ const editCharacteristicById = async ctx => {
   const { characteristicId } = ctx.params
 
   try {
-    const updatedCharacteristic = await Characteristic.findByIdAndUpdate({ _id: characteristicId }, characteristic, {new: true})
-		ctx.body = updatedCharacteristic
-  } catch(err) {
+    const updatedCharacteristic = await Characteristic.findByIdAndUpdate({ _id: characteristicId }, characteristic, { new: true })
+    ctx.body = updatedCharacteristic
+  } catch (err) {
     ctx.throw(err)
   }
 }
@@ -90,7 +92,7 @@ const removeCharacteristics = async ctx => {
       })
     )
     ctx.body = archivedCharacteristics.result
-  } catch(err) {
+  } catch (err) {
     ctx.throw(err)
   }
 }
@@ -99,9 +101,9 @@ const removeCharacteristicById = async ctx => {
   const { characteristicId } = ctx.params
 
   try {
-    const updatedCharacteristic = await Characteristic.findByIdAndUpdate({ _id: characteristicId }, { isArchived: true }, {new: true})
-		ctx.body = updatedCharacteristic
-  } catch(err) {
+    const updatedCharacteristic = await Characteristic.findByIdAndUpdate({ _id: characteristicId }, { isArchived: true }, { new: true })
+    ctx.body = updatedCharacteristic
+  } catch (err) {
     ctx.throw(err)
   }
 }

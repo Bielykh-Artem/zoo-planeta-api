@@ -21,7 +21,7 @@ const productSchema = new Schema({
   assigned: { type: Array },
   selectedChars: { type: Object },
   weight: { type: String, default: '' },
-  brand: { type: Object, default: null },
+  brand: { type: Schema.ObjectId, ref: 'Brand', required: true },
   newPacking: { type: Boolean, default: false },
   group: {
     type: Schema.ObjectId,
