@@ -4,7 +4,6 @@ const Product = require('../models/product')
 
 const getCategory = (menu, assigned) => {
   return menu.find(menuItem => {
-
     if (assigned == menuItem._id) {
       return menuItem
     }
@@ -26,7 +25,9 @@ const getAssignedIds = (menuTreePart, assignedIds) => {
 }
 
 const fetchProducts = async ctx => {
-  const { query: { catalogId } } = ctx.request.body
+  const {
+    query: { catalogId },
+  } = ctx.request.body
   const assignedIds = []
 
   try {
@@ -38,18 +39,15 @@ const fetchProducts = async ctx => {
     const aggregateQuery = [
       { $match: { isCompleted: true } },
       {
-        "$redact": {
-          "$cond": [
+        '$redact': {
+          '$cond': [
             {
-              "$setIsSubset": [
-                "$assigned",
-                assignedIds
-              ]
+              '$setIsSubset': ['$assigned', assignedIds],
             },
-            "$$KEEP",
-            "$$PRUNE"
-          ]
-        }
+            '$$KEEP',
+            '$$PRUNE',
+          ],
+        },
       },
       {
         $lookup: {
@@ -60,6 +58,15 @@ const fetchProducts = async ctx => {
         },
       },
       { $unwind: '$price' },
+      {
+        $lookup: {
+          from: 'brands',
+          let: { product_brand: '$brand' },
+          pipeline: [{ $match: { $expr: { $and: [{ $eq: ['$_id', '$$product_brand'] }, { isArchived: false }] } } }],
+          as: 'brand',
+        },
+      },
+      { $unwind: '$brand' },
       {
         $group: {
           _id: { '$ifNull': ['$group', '$_id'] },
@@ -143,5 +150,5 @@ const fetchFilteredProducts = async ctx => {
 
 module.exports = {
   fetchProducts,
-  fetchFilteredProducts
+  fetchFilteredProducts,
 }

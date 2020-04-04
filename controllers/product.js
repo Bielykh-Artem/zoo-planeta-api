@@ -114,6 +114,15 @@ const fetchProductsForShop = async ctx => {
       },
       { $unwind: '$price' },
       {
+        $lookup: {
+          from: 'brands',
+          let: { product_brand: '$brand' },
+          pipeline: [{ $match: { $expr: { $and: [{ $eq: ['$_id', '$$product_brand'] }, { isArchived: false }] } } }],
+          as: 'brand',
+        },
+      },
+      { $unwind: '$brand' },
+      {
         $group: {
           _id: { '$ifNull': ['$group', '$_id'] },
           doc: { '$first': '$$ROOT' },
@@ -154,6 +163,17 @@ const fetchProductsForShop = async ctx => {
               },
             },
             { $unwind: '$price' },
+            {
+              $lookup: {
+                from: 'brands',
+                let: { product_brand: '$brand' },
+                pipeline: [
+                  { $match: { $expr: { $and: [{ $eq: ['$_id', '$$product_brand'] }, { isArchived: false }] } } },
+                ],
+                as: 'brand',
+              },
+            },
+            { $unwind: '$brand' },
           ]
 
           const groupedProducts = await Product.aggregate(aggregateQuery)
