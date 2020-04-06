@@ -2,7 +2,7 @@ const Client = require('../models/client')
 const ObjectId = require('mongodb').ObjectID
 
 const fetchClients = async ctx => {
-  const { skip, limit = 1000000, search = '' } = ctx.query
+  const { skip = 0, limit = 1000000, search = '' } = ctx.query
   const fields = ['userName', 'email', 'phoneNumber']
 
   const options = {

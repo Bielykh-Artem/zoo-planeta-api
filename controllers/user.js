@@ -14,7 +14,7 @@ const fetchUser = async ctx => {
 }
 
 const fetchUsers = async ctx => {
-  const { skip, limit = 1000000, search = '' } = ctx.query
+  const { skip = 0, limit = 1000000, search = '' } = ctx.query
   const fields = ['email', 'firstName', 'lastName']
 
   const options = {

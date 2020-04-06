@@ -2,17 +2,19 @@ const Brand = require('../models/brand')
 const ObjectId = require('mongodb').ObjectID
 
 const fetchBrands = async ctx => {
-  const { skip, limit, search } =  ctx.query
+  const { skip = 0, limit = 1000000, search = '' } = ctx.query
   const fields = ['name']
 
   const options = {
-    isArchived: false
+    isArchived: false,
   }
 
   const aggregateQuery = [
-    { $match: {
-      $and: [options],
-      $or: fields.map(field => ({ [field]: { $regex: search, $options: 'ig' } })) },
+    {
+      $match: {
+        $and: [options],
+        $or: fields.map(field => ({ [field]: { $regex: search, $options: 'ig' } })),
+      },
     },
     { $skip: skip * limit },
     { $limit: Number(limit) },
@@ -24,7 +26,6 @@ const fetchBrands = async ctx => {
   } catch (err) {
     ctx.throw(err)
   }
-
 }
 
 const addNewBrand = async ctx => {
@@ -34,15 +35,14 @@ const addNewBrand = async ctx => {
 
     const newBrand = new Brand({
       ...brand,
-      createdBy: user._id
+      createdBy: user._id,
     })
 
     newBrand._id = new ObjectId()
 
     const savedBrand = await newBrand.save()
     ctx.body = savedBrand
-
-  } catch(err) {
+  } catch (err) {
     ctx.throw(err)
   }
 }
@@ -52,9 +52,9 @@ const editBrandById = async ctx => {
   const { brandId } = ctx.params
 
   try {
-    const updatedBrand = await Brand.findByIdAndUpdate({ _id: brandId }, brand, {new: true})
-		ctx.body = updatedBrand
-  } catch(err) {
+    const updatedBrand = await Brand.findByIdAndUpdate({ _id: brandId }, brand, { new: true })
+    ctx.body = updatedBrand
+  } catch (err) {
     ctx.throw(err)
   }
 }
@@ -63,9 +63,9 @@ const removeBrandById = async ctx => {
   const { brandId } = ctx.params
 
   try {
-    const updatedBrand = await Brand.findByIdAndUpdate({ _id: brandId }, { isArchived: true }, {new: true})
-		ctx.body = updatedBrand
-  } catch(err) {
+    const updatedBrand = await Brand.findByIdAndUpdate({ _id: brandId }, { isArchived: true }, { new: true })
+    ctx.body = updatedBrand
+  } catch (err) {
     ctx.throw(err)
   }
 }
@@ -76,18 +76,17 @@ const removeBrands = async ctx => {
   try {
     const archivedBrands = await Brand.bulkWrite(
       brandIds.map(id => {
-
         return {
           updateOne: {
             filter: { _id: id },
             update: { $set: { isArchived: true } },
-            upsert: true
-          }
+            upsert: true,
+          },
         }
       })
     )
     ctx.body = archivedBrands.result
-  } catch(err) {
+  } catch (err) {
     ctx.throw(err)
   }
 }
@@ -97,5 +96,5 @@ module.exports = {
   addNewBrand,
   editBrandById,
   removeBrands,
-  removeBrandById
+  removeBrandById,
 }

@@ -7,7 +7,7 @@ const OrderProduct = require('../models/orderProduct')
 const utils = require('../utils')
 
 const fetchOrders = async ctx => {
-  const { skip, limit, search, supplier, startDate, endDate, status } = ctx.query
+  const { skip = 0, limit = 100000, search = '', supplier, startDate, endDate, status } = ctx.query
   const fields = ['orderNumber', 'status', 'city']
   const clientFields = ['client.userName', 'client.email', 'client.phoneNumber']
 

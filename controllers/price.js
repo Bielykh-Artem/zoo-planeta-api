@@ -3,11 +3,11 @@ const Product = require('../models/product')
 const ObjectId = require('mongodb').ObjectID
 
 const fetchPrices = async ctx => {
-  const { skip, limit, search, supplier } =  ctx.query
+  const { skip = 0, limit = 10000, search = '', supplier } = ctx.query
   const fields = ['supplier', 'supplierCode', 'name']
 
   const options = {
-    isArchived: false
+    isArchived: false,
   }
 
   if (supplier) {
@@ -15,9 +15,11 @@ const fetchPrices = async ctx => {
   }
 
   const aggregateQuery = [
-    { $match: {
-      $and: [options],
-      $or: fields.map(field => ({ [field]: { $regex: search, $options: 'ig' } })) },
+    {
+      $match: {
+        $and: [options],
+        $or: fields.map(field => ({ [field]: { $regex: search, $options: 'ig' } })),
+      },
     },
     { $skip: skip * limit },
     { $limit: Number(limit) },
@@ -38,7 +40,6 @@ const bulkWritePrice = async ctx => {
   try {
     const uploadedPrice = await Price.bulkWrite(
       price.map(item => {
-
         item.id = new ObjectId()
         item.createdBy = user._id
         item.isArchived = false
@@ -47,21 +48,23 @@ const bulkWritePrice = async ctx => {
           updateOne: {
             filter: { supplierCode: item.supplierCode },
             update: { $set: item },
-            upsert: true
-          }
+            upsert: true,
+          },
         }
       })
     )
 
     const ids = uploadedPrice.result.upserted.map(priceItem => priceItem._id)
-    
+
     const aggregateQuery = [
-      { $match: { "_id": { $in: ids } } },
-      { $addFields: {
-        price: "$_id",
-      }}
+      { $match: { '_id': { $in: ids } } },
+      {
+        $addFields: {
+          price: '$_id',
+        },
+      },
     ]
-    
+
     const records = await Price.aggregate(aggregateQuery)
 
     const products = JSON.parse(JSON.stringify(records)).map(record => {
@@ -78,8 +81,8 @@ const bulkWritePrice = async ctx => {
           updateOne: {
             filter: { price: item.price },
             update: { $set: item },
-            upsert: true
-          }
+            upsert: true,
+          },
         }
       })
     )
@@ -94,9 +97,9 @@ const removePriceItemById = async ctx => {
   const { priceId } = ctx.params
 
   try {
-    const updatedPriceItem = await Price.findByIdAndUpdate({ _id: priceId }, { isArchived: true }, {new: true})
-		ctx.body = updatedPriceItem
-  } catch(err) {
+    const updatedPriceItem = await Price.findByIdAndUpdate({ _id: priceId }, { isArchived: true }, { new: true })
+    ctx.body = updatedPriceItem
+  } catch (err) {
     ctx.throw(err)
   }
 }
@@ -106,9 +109,9 @@ const updatePriceItemById = async ctx => {
   const priceItem = ctx.request.body
 
   try {
-    const updatedPriceItem = await Price.findByIdAndUpdate({ _id: priceId }, priceItem, {new: true})
-		ctx.body = updatedPriceItem
-  } catch(err) {
+    const updatedPriceItem = await Price.findByIdAndUpdate({ _id: priceId }, priceItem, { new: true })
+    ctx.body = updatedPriceItem
+  } catch (err) {
     ctx.throw(err)
   }
 }
@@ -120,7 +123,6 @@ const bulkUpdatePrice = async ctx => {
   try {
     const uploadedPrice = await Price.bulkWrite(
       price.map(item => {
-
         item.id = new ObjectId()
         item.createdBy = user._id
         item.isArchived = false
@@ -129,21 +131,23 @@ const bulkUpdatePrice = async ctx => {
           updateOne: {
             filter: { supplierCode: item.supplierCode },
             update: { $set: item },
-            upsert: true
-          }
+            upsert: true,
+          },
         }
       })
     )
 
     const ids = uploadedPrice.result.upserted.map(priceItem => priceItem._id)
-    
+
     const aggregateQuery = [
-      { $match: { "_id": { $in: ids } } },
-      { $addFields: {
-        price: "$_id",
-      }}
+      { $match: { '_id': { $in: ids } } },
+      {
+        $addFields: {
+          price: '$_id',
+        },
+      },
     ]
-    
+
     const records = await Price.aggregate(aggregateQuery)
     ctx.body = records
   } catch (err) {
@@ -157,18 +161,17 @@ const removePrices = async ctx => {
   try {
     const archivedPrices = await Price.bulkWrite(
       priceIds.map(id => {
-
         return {
           updateOne: {
             filter: { _id: id },
             update: { $set: { isArchived: true } },
-            upsert: true
-          }
+            upsert: true,
+          },
         }
       })
     )
     ctx.body = archivedPrices.result
-  } catch(err) {
+  } catch (err) {
     ctx.throw(err)
   }
 }
@@ -179,5 +182,5 @@ module.exports = {
   removePriceItemById,
   updatePriceItemById,
   bulkUpdatePrice,
-  removePrices
+  removePrices,
 }

@@ -86,7 +86,7 @@ const updateProduct = async ctx => {
 }
 
 const fetchProductsForShop = async ctx => {
-  const { skip, limit, search = '', is_new, popular } = ctx.query
+  const { skip = 0, limit = 100000, search = '', is_new, popular } = ctx.query
   const fields = ['name']
   const productOptions = {
     isCompleted: true,

@@ -2,17 +2,19 @@ const Banner = require('../models/banner')
 const ObjectId = require('mongodb').ObjectID
 
 const fetchBanners = async ctx => {
-  const { skip, limit = 1000000, search = '' } =  ctx.query
+  const { skip = 0, limit = 1000000, search = '' } = ctx.query
   const fields = ['title']
 
   const options = {
-    isArchived: false
+    isArchived: false,
   }
 
   const aggregateQuery = [
-    { $match: {
-      $and: [options],
-      $or: fields.map(field => ({ [field]: { $regex: search, $options: 'ig' } })) },
+    {
+      $match: {
+        $and: [options],
+        $or: fields.map(field => ({ [field]: { $regex: search, $options: 'ig' } })),
+      },
     },
     { $skip: skip * limit },
     { $limit: Number(limit) },
@@ -24,7 +26,6 @@ const fetchBanners = async ctx => {
   } catch (err) {
     ctx.throw(err)
   }
-
 }
 
 const addNewBanner = async ctx => {
@@ -34,15 +35,14 @@ const addNewBanner = async ctx => {
 
     const newBanner = new Banner({
       ...banner,
-      createdBy: user._id
+      createdBy: user._id,
     })
 
     newBanner._id = new ObjectId()
 
     const savedBanner = await newBanner.save()
     ctx.body = savedBanner
-
-  } catch(err) {
+  } catch (err) {
     ctx.throw(err)
   }
 }
@@ -52,9 +52,9 @@ const editBannerById = async ctx => {
   const { bannerId } = ctx.params
 
   try {
-    const updatedBanner = await Banner.findByIdAndUpdate({ _id: bannerId }, banner, {new: true})
-		ctx.body = updatedBanner
-  } catch(err) {
+    const updatedBanner = await Banner.findByIdAndUpdate({ _id: bannerId }, banner, { new: true })
+    ctx.body = updatedBanner
+  } catch (err) {
     ctx.throw(err)
   }
 }
@@ -63,9 +63,9 @@ const removeBannerById = async ctx => {
   const { bannerId } = ctx.params
 
   try {
-    const updatedBanner = await Banner.findByIdAndUpdate({ _id: bannerId }, { isArchived: true }, {new: true})
-		ctx.body = updatedBanner
-  } catch(err) {
+    const updatedBanner = await Banner.findByIdAndUpdate({ _id: bannerId }, { isArchived: true }, { new: true })
+    ctx.body = updatedBanner
+  } catch (err) {
     ctx.throw(err)
   }
 }
@@ -76,18 +76,17 @@ const removeBanners = async ctx => {
   try {
     const archivedBanners = await Banner.bulkWrite(
       bannerIds.map(id => {
-
         return {
           updateOne: {
             filter: { _id: id },
             update: { $set: { isArchived: true } },
-            upsert: true
-          }
+            upsert: true,
+          },
         }
       })
     )
     ctx.body = archivedBanners.result
-  } catch(err) {
+  } catch (err) {
     ctx.throw(err)
   }
 }
@@ -97,5 +96,5 @@ module.exports = {
   addNewBanner,
   editBannerById,
   removeBanners,
-  removeBannerById
+  removeBannerById,
 }
