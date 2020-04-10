@@ -29,10 +29,6 @@ require('./routes/shop')(publicShopRouter)
 
 mongoose.connect(global.gConfig.db_url, { useNewUrlParser: true, useUnifiedTopology: true })
 
-mongoose.connection.on('connected', () => {
-  console.log('connected')
-});
-
 mongoose.Promise = global.Promise
 
 app
