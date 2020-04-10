@@ -9,8 +9,9 @@ const config = {
     config_id: 'development',
     app_name: 'zoo-planeta-api',
     node_port: NODE_PORT,
-    db_url: 'mongodb://localhost:27017/admin',
+    // db_url: 'mongodb://localhost:27017/admin',
     // db_url: process.env.MONGODB_URI,
+    db_url: 'mongodb://exampleUser:changeThisInfo@localhost:27017/my_db_name',
   },
   release: {
     config_id: 'release',
