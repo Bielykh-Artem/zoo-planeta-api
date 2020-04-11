@@ -3,25 +3,24 @@ require('dotenv').config()
 const _ = require('lodash')
 
 const NODE_PORT = process.env.PORT || 4000
+const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/admin'
 
 const config = {
   development: {
     config_id: 'development',
     app_name: 'zoo-planeta-api',
     node_port: NODE_PORT,
-    // db_url: 'mongodb://localhost:27017/admin',
-    // db_url: process.env.MONGODB_URI,
-    db_url: 'mongodb://exampleUser:changeThisInfo@localhost:27017/my_db_name',
+    db_url: MONGODB_URI,
   },
   release: {
     config_id: 'release',
     node_port: NODE_PORT,
-    db_url: process.env.MONGODB_URI,
+    db_url: MONGODB_URI,
   },
   production: {
     config_id: 'production',
     node_port: NODE_PORT,
-    db_url: process.env.MONGODB_URI,
+    db_url: MONGODB_URI,
   },
 }
 
