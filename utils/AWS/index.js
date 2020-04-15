@@ -4,8 +4,8 @@ const uuid = require("uuid");
 
 const config = {
   region: "us-east-2",
-  accessKeyId: '',
-  secretAccessKey: '',
+  accessKeyId: 'ec37da3ee3af0572bb',
+  secretAccessKey: '20c202ed66d6b5313d60b4edadb2d0d0281b33b9435c41',
   Bucket: "zoo-planeta",
   dirName: 'content/images'
 }
