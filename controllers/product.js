@@ -87,11 +87,14 @@ const updateProduct = async ctx => {
     })
   )
 
+  console.log('product =>', product)
+
 
   try {
     const updatedProduct = await Product.findByIdAndUpdate({ _id: productId }, product, { new: true })
     ctx.body = updatedProduct
   } catch (err) {
+    console.log('err =>', err)
     ctx.throw(err)
   }
 }
