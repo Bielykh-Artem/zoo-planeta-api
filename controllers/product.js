@@ -78,23 +78,10 @@ const updateProduct = async ctx => {
   const product = ctx.request.body
   const { productId } = ctx.params
 
-  await Promise.all(
-    product.images.map(async img => {
-      const uploadedImage = await uploadImage(img.url)
-      delete img.url
-      img.url = uploadedImage
-      return img
-    })
-  )
-
-  console.log('product =>', product)
-
-
   try {
     const updatedProduct = await Product.findByIdAndUpdate({ _id: productId }, product, { new: true })
     ctx.body = updatedProduct
   } catch (err) {
-    console.log('err =>', err)
     ctx.throw(err)
   }
 }
