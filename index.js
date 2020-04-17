@@ -24,6 +24,8 @@ app.use(logger())
 app.use(cors())
 
 privateRouter.use(middleware.requireAuth)
+privateRouter.use(middleware.errorHandler)
+
 require('./routes/admin')(privateRouter, publicRouter)
 require('./routes/shop')(publicShopRouter)
 
