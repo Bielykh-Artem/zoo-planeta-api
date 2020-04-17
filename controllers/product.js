@@ -1,6 +1,7 @@
 const Product = require('../models/product')
 const Group = require('../models/group')
 const ObjectId = require('mongodb').ObjectID
+const { uploadImage } = require('../utils/AWS')
 
 const fetchProducts = async ctx => {
   const { skip = 0, limit = 1000000, search = '', completed, supplier } = ctx.query
@@ -76,6 +77,16 @@ const fetchProducts = async ctx => {
 const updateProduct = async ctx => {
   const product = ctx.request.body
   const { productId } = ctx.params
+
+  await Promise.all(
+    product.images.map(async img => {
+      const uploadedImage = await uploadImage(img.url)
+      delete img.url
+      img.url = uploadedImage
+      return img
+    })
+  )
+
 
   try {
     const updatedProduct = await Product.findByIdAndUpdate({ _id: productId }, product, { new: true })
