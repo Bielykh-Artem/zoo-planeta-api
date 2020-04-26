@@ -1,6 +1,6 @@
-const mongoose = require('mongoose')
+const mongoose = require("mongoose");
 
-const Schema = mongoose.Schema
+const Schema = mongoose.Schema;
 
 const orderSchema = new Schema({
   city: { type: String, required: true },
@@ -13,11 +13,11 @@ const orderSchema = new Schema({
   promoCode: { type: String },
   status: { type: Number },
   createdAt: { type: Date, default: Date.now },
-  createdBy: { type: Schema.ObjectId, ref: 'User' },
+  createdBy: { type: Schema.ObjectId, ref: "User" },
   isArchived: { type: Boolean, required: true, default: false },
-  orderProducts: [{ type: Schema.ObjectId, ref: 'order_product', required: true }],
-  client: { type: Schema.ObjectId, ref: 'Client' },
+  orderProducts: [{ type: Schema.ObjectId, ref: "order_product", required: true }],
+  client: { type: Schema.ObjectId, ref: "Client" },
   orderNumber: { type: Number, required: true },
-})
+});
 
-module.exports = mongoose.model('order', orderSchema)
+module.exports = mongoose.model("order", orderSchema);

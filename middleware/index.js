@@ -1,27 +1,24 @@
-const jwt = require('jsonwebtoken')
-const { HttpStatus } = require('http-status-codes')
+const jwt = require("jsonwebtoken");
+const { HttpStatus } = require("http-status-codes");
 
 const requireAuth = async (ctx, next) => {
-  const { token } = ctx.request
+  const { token } = ctx.request;
 
   if (token) {
     try {
-      const decoded = jwt.verify(token, process.env.SECRET)
-      ctx.decoded = decoded
+      const decoded = jwt.verify(token, process.env.SECRET);
+      ctx.decoded = decoded;
 
-      await next()
-
+      await next();
     } catch (err) {
-      ctx.status = 401
-      ctx.body = 'Invalid authorization token'
+      ctx.status = 401;
+      ctx.body = "Invalid authorization token";
     }
-
   } else {
-    ctx.status = 401
-    ctx.body = 'Unauthorized'
+    ctx.status = 401;
+    ctx.body = "Unauthorized";
   }
-
-}
+};
 
 const handleJoiErrors = details => {
   if (!details.length) {
@@ -61,5 +58,5 @@ const errorHandler = async (ctx, next) => {
 
 module.exports = {
   requireAuth,
-  errorHandler
-}
+  errorHandler,
+};

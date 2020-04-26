@@ -1,42 +1,42 @@
-require('dotenv').config()
-const Menu = require('../models/menu')
-const ObjectId = require('mongodb').ObjectID
+require("dotenv").config();
+const Menu = require("../models/menu");
+const ObjectId = require("mongodb").ObjectID;
 
 const fetchMenuTree = async ctx => {
   try {
-    const menuTree = await Menu.find().sort({ order: 1 })
-    ctx.body = menuTree
+    const menuTree = await Menu.find().sort({ order: 1 });
+    ctx.body = menuTree;
   } catch (err) {
-    ctx.throw(err)
+    ctx.throw(err);
   }
-}
+};
 
 const prepareMenuTreeBeforeSave = async menuTreeData => {
   for (const [idx, item] of menuTreeData.entries()) {
-    item.order = idx
+    item.order = idx;
 
     if (!item._id) {
-      item._id = new ObjectId()
+      item._id = new ObjectId();
     }
 
     if (item.children && item.children.length) {
-      item.children = await prepareMenuTreeBeforeSave(item.children)
+      item.children = await prepareMenuTreeBeforeSave(item.children);
     }
   }
 
-  return menuTreeData
-}
+  return menuTreeData;
+};
 
 const updateMenuTree = async ctx => {
-  const menuTreeData = ctx.request.body
-  const { user } = ctx.decoded
+  const menuTreeData = ctx.request.body;
+  const { user } = ctx.decoded;
 
-  const prepareMenuTree = await prepareMenuTreeBeforeSave(menuTreeData)
+  const prepareMenuTree = await prepareMenuTreeBeforeSave(menuTreeData);
 
   try {
     await Menu.bulkWrite(
       prepareMenuTree.map(item => {
-        item.createdBy = user._id
+        item.createdBy = user._id;
 
         return {
           updateOne: {
@@ -44,18 +44,18 @@ const updateMenuTree = async ctx => {
             update: { $set: item },
             upsert: true,
           },
-        }
-      })
-    )
+        };
+      }),
+    );
 
-    const foundMenuTree = await Menu.find()
-    ctx.body = foundMenuTree
+    const foundMenuTree = await Menu.find();
+    ctx.body = foundMenuTree;
   } catch (err) {
-    ctx.throw(err)
+    ctx.throw(err);
   }
-}
+};
 
 module.exports = {
   fetchMenuTree,
   updateMenuTree,
-}
+};

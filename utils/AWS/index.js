@@ -4,11 +4,11 @@ const uuid = require("uuid");
 
 const config = {
   region: "us-east-2",
-  accessKeyId: 'AKIAUR66KPQYMGS5Z4UI',
-  secretAccessKey: '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',
+  accessKeyId: "AKIAUR66KPQYMGS5Z4UI",
+  secretAccessKey: "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",
   Bucket: "zoo-planeta",
-  dirName: 'content/images'
-}
+  dirName: "content/images",
+};
 
 const s3 = new S3({
   region: config.region,
@@ -83,5 +83,5 @@ const deleteImage = async fileName =>
 module.exports = {
   parseImage,
   uploadImage,
-  deleteImage
-}
+  deleteImage,
+};

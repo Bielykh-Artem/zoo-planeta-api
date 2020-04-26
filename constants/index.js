@@ -2,7 +2,7 @@ const PRICE_ITEM_TYPES = {
   WITHOUT_CHANGES: 0,
   UPDATED: 1,
   NEW: 2,
-}
+};
 
 const ORDER_STATUSES = {
   NEW: 0,
@@ -12,9 +12,9 @@ const ORDER_STATUSES = {
   COMPLETED: 4,
   CANCELED: 5,
   MONEYBACK: 6,
-}
+};
 
 module.exports = {
   PRICE_ITEM_TYPES,
   ORDER_STATUSES,
-}
+};

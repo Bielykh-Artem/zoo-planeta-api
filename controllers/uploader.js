@@ -1,19 +1,18 @@
-require('dotenv').config()
+require("dotenv").config();
 
-const { uploadImage } = require('../utils/AWS')
+const { uploadImage } = require("../utils/AWS");
 
 const uploadImageToCloudinary = async ctx => {
-  let base64String = ctx.request.body.file
+  let base64String = ctx.request.body.file;
 
   try {
-    const uploadedImage = await uploadImage(base64String)
-    ctx.body = uploadedImage
-
+    const uploadedImage = await uploadImage(base64String);
+    ctx.body = uploadedImage;
   } catch (err) {
-    ctx.throw(err)
+    ctx.throw(err);
   }
-}
+};
 
 module.exports = {
-  uploadImageToCloudinary
-}
+  uploadImageToCloudinary,
+};

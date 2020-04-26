@@ -6,8 +6,16 @@
   "scripts": {
     "dev": "NODE_ENV=development nodemon index.js --watch ./",
     "start": "node index.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "lint": "eslint --fix src -c .eslintrc.json --ext js,jsx",
+    "prettier": "prettier --write --print-width 120  --trailing-comma all \"**/**/*.+(ts|tsx|js|jsx)\"",
+    "commit-hook": "git add ."
   },
+  "pre-commit": [
+    "prettier",
+    "lint",
+    "commit-hook"
+  ],
   "author": "",
   "license": "ISC",
   "dependencies": {
@@ -30,6 +38,9 @@
     "mongodb": "^3.4.1",
     "mongoose": "^5.8.3",
     "nodemon": "^2.0.2",
-    "uuid": "^7.0.3"
+    "uuid": "^7.0.3",
+    "lint-staged": "^9.4.2",
+    "pre-commit": "^1.2.2",
+    "prettier": "^1.19.1"
   }
 }
