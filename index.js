@@ -8,6 +8,8 @@ const mongoose = require("mongoose");
 const cors = require("@koa/cors");
 const BearerToken = require("koa-bearer-token");
 const middleware = require("./middleware");
+const fs = require("fs");
+const tunnel = require("tunnel-ssh");
 
 const app = new Koa();
 const publicRouter = new Router({ prefix: "/api/v1" });
@@ -31,9 +33,37 @@ privateRouter.use(middleware.errorHandler);
 require("./routes/admin")(privateRouter, publicRouter);
 require("./routes/shop")(publicShopRouter);
 
-mongoose.connect(global.gConfig.db_url, { useNewUrlParser: true, useUnifiedTopology: true });
+// --- Default connection ---
 
+mongoose.connect(global.gConfig.db_url, { useNewUrlParser: true, useUnifiedTopology: true });
 mongoose.Promise = global.Promise;
+
+// --- Tunnel Connection ---
+// const tunnelConfig = {
+//   username: "ubuntu",
+//   host: "ec2-13-58-97-251.us-east-2.compute.amazonaws.com",
+//   agent: process.env.SSH_AUTH_SOCK,
+//   privateKey: require("fs").readFileSync("/Users/artembielykh/Desktop/MyKeyPair.pem"),
+//   port: 22,
+//   dstPort: 27017,
+// };
+
+// const server = tunnel(tunnelConfig, function(error, server) {
+//   if (error) {
+//     console.log("SSH connection error: " + error);
+//   }
+//   console.log("database connection initalizing");
+//   mongoose.connect("mongodb://localhost:27017/admin");
+
+//   const db = mongoose.connection;
+
+//   db.on("error", console.error.bind(console, "connection error:"));
+//   db.once("open", function() {
+//     console.log("database connection established");
+//   });
+// });
+
+// --- End ---
 
 app
   .use(privateRouter.routes())

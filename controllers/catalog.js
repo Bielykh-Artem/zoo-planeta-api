@@ -1,6 +1,7 @@
 const ObjectId = require("mongodb").ObjectID;
 const Menu = require("../models/menu");
 const Product = require("../models/product");
+const _ = require("lodash");
 
 const getCategory = (menu, assigned) => {
   return menu.find(menuItem => {
@@ -19,9 +20,9 @@ const getCategory = (menu, assigned) => {
 const getAssignedIds = (menuTreePart, assignedIds) => {
   if (menuTreePart.children.length) {
     menuTreePart.children.forEach(ch => getAssignedIds(ch, assignedIds));
-  } else {
-    assignedIds.push(menuTreePart._id);
   }
+
+  assignedIds.push(String(menuTreePart._id));
 };
 
 const fetchProducts = async ctx => {
@@ -130,7 +131,7 @@ const fetchProducts = async ctx => {
           delete product.name;
           delete product.group;
 
-          product.groupedProducts = groupedProducts;
+          product.groupedProducts = _.orderBy(groupedProducts, ["weight"], ["desc"]);
         }
 
         return product;
