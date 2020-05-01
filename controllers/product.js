@@ -350,6 +350,19 @@ const getGroupedProducts = async ctx => {
   }
 };
 
+const fetchProductsByIds = async ctx => {
+  const { product } = ctx.query;
+
+  const productIds = product.split("?product=");
+
+  try {
+    const products = await Product.find({ _id: { $in: productIds } }, { _id: 1, name: 1, images: 1 });
+    ctx.body = products;
+  } catch (err) {
+    ctx.throw(err);
+  }
+};
+
 module.exports = {
   fetchProducts,
   fetchProductForShop,
@@ -357,4 +370,5 @@ module.exports = {
   updateProduct,
   groupProducts,
   getGroupedProducts,
+  fetchProductsByIds,
 };
