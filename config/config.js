@@ -3,8 +3,7 @@ require("dotenv").config();
 const _ = require("lodash");
 
 const NODE_PORT = process.env.PORT || 4000;
-const MONGODB_URI = "mongodb://localhost:27017/admin" || "mongodb://localhost:27017/admin";
-// "mongodb://localhost:27017/admin";
+const MONGODB_URI = process.env.MONGODB_URI || "mongodb://localhost:27017/admin";
 
 const config = {
   development: {

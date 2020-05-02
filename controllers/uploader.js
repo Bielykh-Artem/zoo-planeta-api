@@ -1,14 +1,15 @@
 require("dotenv").config();
 
-const { uploadImage } = require("../utils/AWS");
+const { uploadImage } = require("../utils/Cloudinary");
 
 const uploadImageToCloudinary = async ctx => {
   let base64String = ctx.request.body.file;
 
   try {
     const uploadedImage = await uploadImage(base64String);
-    ctx.body = uploadedImage;
+    ctx.body = uploadedImage.url;
   } catch (err) {
+    console.log(err);
     ctx.throw(err);
   }
 };

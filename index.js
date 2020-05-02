@@ -21,7 +21,7 @@ app.use(
     formLimit: "50mb",
     jsonLimit: "50mb",
     textLimit: "50mb",
-  })
+  }),
 );
 app.use(BearerToken());
 app.use(logger());
@@ -35,7 +35,11 @@ require("./routes/shop")(publicShopRouter);
 
 // --- Default connection ---
 
-mongoose.connect(global.gConfig.db_url, { useNewUrlParser: true, useUnifiedTopology: true });
+mongoose.connect(global.gConfig.db_url, { useNewUrlParser: true, useUnifiedTopology: true }, (err, db) => {
+  if (err) {
+    console.log("error: " + err);
+  }
+});
 mongoose.Promise = global.Promise;
 
 // --- Tunnel Connection ---
