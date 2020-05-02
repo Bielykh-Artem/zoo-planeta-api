@@ -9,7 +9,7 @@ const cors = require("@koa/cors");
 const BearerToken = require("koa-bearer-token");
 const middleware = require("./middleware");
 const fs = require("fs");
-const tunnel = require("tunnel-ssh");
+// const tunnel = require("tunnel-ssh");
 
 const app = new Koa();
 const publicRouter = new Router({ prefix: "/api/v1" });
@@ -21,7 +21,7 @@ app.use(
     formLimit: "50mb",
     jsonLimit: "50mb",
     textLimit: "50mb",
-  }),
+  })
 );
 app.use(BearerToken());
 app.use(logger());
