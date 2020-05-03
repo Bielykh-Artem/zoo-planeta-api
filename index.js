@@ -10,18 +10,37 @@ const BearerToken = require("koa-bearer-token");
 const middleware = require("./middleware");
 const fs = require("fs");
 // const tunnel = require("tunnel-ssh");
+const Ctrl = require("./controllers/callback");
 
 const app = new Koa();
 const publicRouter = new Router({ prefix: "/api/v1" });
 const privateRouter = new Router({ prefix: "/api/v1" });
 const publicShopRouter = new Router({ prefix: "/api/v2" });
 
+const server = require("http").createServer(app.callback());
+const io = require("socket.io")(server);
+
+io.on("connection", function(socket) {
+  socket.on("message", socketCtx => Ctrl.createCallback(socketCtx, socket));
+
+  socket.emit();
+
+  socket.on("disconnect", function() {
+    console.log("client disconnect...", socket.id);
+  });
+
+  socket.on("error", function(err) {
+    console.log("received error from client:", socket.id);
+    console.log(err);
+  });
+});
+
 app.use(
   BodyParser({
     formLimit: "50mb",
     jsonLimit: "50mb",
     textLimit: "50mb",
-  })
+  }),
 );
 app.use(BearerToken());
 app.use(logger());
@@ -75,4 +94,4 @@ app
   .use(publicShopRouter.routes())
   .use(publicRouter.allowedMethods());
 
-app.listen(global.gConfig.node_port, () => console.log(`Listening port ${global.gConfig.node_port}`));
+server.listen(global.gConfig.node_port, () => console.log(`Listening port ${global.gConfig.node_port}`));
