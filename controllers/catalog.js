@@ -42,17 +42,6 @@ const fetchProducts = async ctx => {
 
     const options = { isCompleted: true };
 
-    /**
-     * Product rage
-     */
-    // if (filters && filters.length) {
-    //   filters.forEach(f => {
-    //     if (f.type !== "IN") {
-    //       options[f.field] = { "$gte": f.values.min, "$lt": f.values.max };
-    //     }
-    //   });
-    // }
-
     const aggregateQuery = [
       {
         $match: {
@@ -90,7 +79,6 @@ const fetchProducts = async ctx => {
         },
       },
       { $unwind: "$price" },
-      // { $match: { "price.retailPrice": { "$gte": 600, "$lt": 900 } } }, // TODO
       {
         $lookup: {
           from: "brands",
@@ -120,12 +108,25 @@ const fetchProducts = async ctx => {
     ];
 
     /**
-     * Product Brand
+     * Filter By Product Brand
      */
     if (filters && filters.length) {
       filters.forEach(f => {
         if (f.type === "IN" && f.values.length) {
           aggregateQuery[0].$match[f.field] = { $in: f.values.map(v => new ObjectId(v)) };
+        }
+      });
+    }
+
+    /**
+     * Filter By Product Range
+     */
+    if (filters && filters.length) {
+      filters.forEach(f => {
+        if (f.type === "RANGE") {
+          console.log("f.values", f.values);
+
+          aggregateQuery.push({ $match: { [f.field]: { "$gte": Number(f.values.min), "$lt": Number(f.values.max) } } });
         }
       });
     }
@@ -186,7 +187,7 @@ const fetchProducts = async ctx => {
         }
 
         return product;
-      }),
+      })
     );
 
     ctx.body = products;
