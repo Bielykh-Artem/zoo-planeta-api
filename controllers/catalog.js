@@ -27,9 +27,12 @@ const getAssignedIds = (menuTreePart, assignedIds) => {
 
 const fetchProducts = async ctx => {
   const {
+    advancedSearch: { skip, limit, filters, searchStr },
     query: { catalogId },
   } = ctx.request.body;
   const assignedIds = [];
+
+  const fields = ["name"];
 
   try {
     const menuTree = await Menu.find().sort({ order: 1 });
@@ -37,8 +40,28 @@ const fetchProducts = async ctx => {
 
     getAssignedIds(menuTreePart, assignedIds);
 
+    const options = { isCompleted: true };
+
+    /**
+     * Product rage
+     */
+    // if (filters && filters.length) {
+    //   filters.forEach(f => {
+    //     if (f.type !== "IN") {
+    //       options[f.field] = { "$gte": f.values.min, "$lt": f.values.max };
+    //     }
+    //   });
+    // }
+
     const aggregateQuery = [
-      { $match: { isCompleted: true } },
+      {
+        $match: {
+          $and: [options],
+          $or: fields.map(field => ({ [field]: { $regex: searchStr, $options: "ig" } })),
+        },
+      },
+      { $skip: skip * limit },
+      { $limit: Number(limit) },
       {
         $redact: {
           $cond: [
@@ -54,16 +77,33 @@ const fetchProducts = async ctx => {
         $lookup: {
           from: "prices",
           let: { product_price: "$price" },
-          pipeline: [{ $match: { $expr: { $and: [{ $eq: ["$_id", "$$product_price"] }, { isArchived: false }] } } }],
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $and: [{ $eq: ["$_id", "$$product_price"] }, { isArchived: false }],
+                },
+              },
+            },
+          ],
           as: "price",
         },
       },
       { $unwind: "$price" },
+      // { $match: { "price.retailPrice": { "$gte": 600, "$lt": 900 } } }, // TODO
       {
         $lookup: {
           from: "brands",
           let: { product_brand: "$brand" },
-          pipeline: [{ $match: { $expr: { $and: [{ $eq: ["$_id", "$$product_brand"] }, { isArchived: false }] } } }],
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $and: [{ $eq: ["$_id", "$$product_brand"] }, { isArchived: false }],
+                },
+              },
+            },
+          ],
           as: "brand",
         },
       },
@@ -78,6 +118,17 @@ const fetchProducts = async ctx => {
         $replaceRoot: { newRoot: { $mergeObjects: [{ _id: "$_id" }, "$doc"] } },
       },
     ];
+
+    /**
+     * Product Brand
+     */
+    if (filters && filters.length) {
+      filters.forEach(f => {
+        if (f.type === "IN" && f.values.length) {
+          aggregateQuery[0].$match[f.field] = { $in: f.values.map(v => new ObjectId(v)) };
+        }
+      });
+    }
 
     const products = await Product.aggregate(aggregateQuery);
 
