@@ -107,26 +107,48 @@ const fetchProducts = async ctx => {
       },
     ];
 
-    /**
-     * Filter By Product Brand
-     */
     if (filters && filters.length) {
       filters.forEach(f => {
+        /**
+         * Filter By Product Brand
+         */
         if (f.type === "IN" && f.values.length) {
           aggregateQuery[0].$match[f.field] = { $in: f.values.map(v => new ObjectId(v)) };
         }
-      });
-    }
 
-    /**
-     * Filter By Product Range
-     */
-    if (filters && filters.length) {
-      filters.forEach(f => {
+        /**
+         * Filter By Product Range
+         */
         if (f.type === "RANGE") {
-          console.log("f.values", f.values);
+          aggregateQuery.push({ $match: { [f.field]: { $gte: Number(f.values.min), $lt: Number(f.values.max) } } });
+        }
 
-          aggregateQuery.push({ $match: { [f.field]: { "$gte": Number(f.values.min), "$lt": Number(f.values.max) } } });
+        /**
+         * Filter by Product Charactiristics
+         */
+        if (f.type === "OPTIONS") {
+          f.values.forEach(opt => {
+            for (let i in opt) {
+              if (opt[i] && opt[i].options.length) {
+                if (opt[i].type === 2) {
+                  // TODO now it work like OR but need change to AND
+                  aggregateQuery.push({
+                    $redact: {
+                      $cond: [
+                        {
+                          $setIsSubset: [`$${f.field}.${i}`, opt[i].options],
+                        },
+                        "$$KEEP",
+                        "$$PRUNE",
+                      ],
+                    },
+                  });
+                } else if (opt[i].type === 1) {
+                  aggregateQuery[0].$match[`${f.field}.${i}`] = { $in: opt[i].options };
+                }
+              }
+            }
+          });
         }
       });
     }
@@ -187,7 +209,7 @@ const fetchProducts = async ctx => {
         }
 
         return product;
-      })
+      }),
     );
 
     ctx.body = products;
