@@ -44,7 +44,6 @@ const addClient = async ctx => {
     const savedClient = await newClient.save();
     ctx.body = savedClient;
   } catch (err) {
-    console.log("sfsdfsd", err);
     ctx.throw(err);
   }
 };

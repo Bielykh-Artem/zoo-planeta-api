@@ -9,7 +9,6 @@ const uploadImageToCloudinary = async ctx => {
     const uploadedImage = await uploadImage(base64String);
     ctx.body = uploadedImage.url;
   } catch (err) {
-    console.log(err);
     ctx.throw(err);
   }
 };

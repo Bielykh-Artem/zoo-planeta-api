@@ -120,7 +120,7 @@ const fetchProducts = async ctx => {
          * Filter By Product Range
          */
         if (f.type === "RANGE") {
-          aggregateQuery.push({ $match: { [f.field]: { $gte: Number(f.values.min), $lt: Number(f.values.max) } } });
+          aggregateQuery.push({ $match: { [f.field]: { $gte: f.values.min, $lte: f.values.max } } });
         }
 
         /**
@@ -218,9 +218,73 @@ const fetchProducts = async ctx => {
   }
 };
 const fetchFilteredProducts = async ctx => {
-  const data = ctx.request.body;
+  const {
+    query: { catalogId },
+  } = ctx.request.body;
 
-  console.log("data", data);
+  const assignedIds = [];
+  const menuTree = await Menu.find().sort({ order: 1 });
+  const menuTreePart = getCategory(menuTree, catalogId);
+
+  getAssignedIds(menuTreePart, assignedIds);
+
+  const aggregateQuery = [
+    {
+      $match: {
+        $and: [{ isArchived: false, isCompleted: true }],
+      },
+    },
+    {
+      $redact: {
+        $cond: [
+          {
+            $setIsSubset: [`$assigned`, assignedIds],
+          },
+          "$$KEEP",
+          "$$PRUNE",
+        ],
+      },
+    },
+    {
+      $lookup: {
+        from: "brands",
+        let: { product_brand: "$brand" },
+        pipeline: [
+          {
+            $match: {
+              $expr: {
+                $and: [{ $eq: ["$_id", "$$product_brand"] }, { isArchived: false }],
+              },
+            },
+          },
+        ],
+        as: "brand",
+      },
+    },
+    { $unwind: "$brand" },
+    {
+      $lookup: {
+        from: "prices",
+        let: { product_price: "$price" },
+        pipeline: [{ $match: { $expr: { $and: [{ $eq: ["$_id", "$$product_price"] }, { isArchived: false }] } } }],
+        as: "price",
+      },
+    },
+    { $unwind: "$price" },
+    {
+      $project: {
+        _id: 1,
+        "brand._id": 1,
+        "brand.name": 1,
+        "price.retailPrice": 1,
+        selectedChars: 1,
+        assigned: 1,
+      },
+    },
+  ];
+
+  const products = await Product.aggregate(aggregateQuery);
+  ctx.body = products;
 };
 
 module.exports = {
