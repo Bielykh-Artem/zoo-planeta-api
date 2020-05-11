@@ -53,7 +53,7 @@ const bulkWritePrice = async ctx => {
             upsert: true,
           },
         };
-      })
+      }),
     );
 
     const ids = uploadedPrice.result.upserted.map(priceItem => priceItem._id);
@@ -86,7 +86,7 @@ const bulkWritePrice = async ctx => {
             upsert: true,
           },
         };
-      })
+      }),
     );
 
     ctx.body = records;
@@ -138,7 +138,7 @@ const bulkUpdatePrice = async ctx => {
             upsert: true,
           },
         };
-      })
+      }),
     );
 
     const ids = uploadedPrice.result.upserted.map(priceItem => priceItem._id);
@@ -172,7 +172,7 @@ const removePrices = async ctx => {
             upsert: true,
           },
         };
-      })
+      }),
     );
     ctx.body = archivedPrices.result;
   } catch (err) {
