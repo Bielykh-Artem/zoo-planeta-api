@@ -7,4 +7,5 @@ module.exports = publicRouter => {
   publicRouter.use(require("../shop/characteristics"));
   publicRouter.use(require("../shop/catalog"));
   publicRouter.use(require("../shop/brand"));
+  publicRouter.use(require("../shop/seo"));
 };
