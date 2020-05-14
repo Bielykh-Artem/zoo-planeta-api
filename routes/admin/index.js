@@ -12,4 +12,5 @@ module.exports = (privateRouter, publicRouter) => {
   privateRouter.use(require("../admin/order"));
   privateRouter.use(require("../admin/user"));
   privateRouter.use(require("../admin/client"));
+  privateRouter.use(require("../admin/seo"));
 };
