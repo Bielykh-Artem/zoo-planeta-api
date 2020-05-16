@@ -12,7 +12,8 @@ const saveMainShopSeo = async ctx => {
           id: new ObjectId(),
           createdBy: user._id,
           menuId: new ObjectId(key),
-          text: seoSettings[key],
+          text: seoSettings[key].text || "",
+          shortText: seoSettings[key].shortText || "",
         };
 
         return {
@@ -22,7 +23,7 @@ const saveMainShopSeo = async ctx => {
             upsert: true,
           },
         };
-      }),
+      })
     );
 
     ctx.body = result;
