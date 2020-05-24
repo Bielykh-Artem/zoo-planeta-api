@@ -204,11 +204,6 @@ const fetchProducts = async ctx => {
           delete product.isArchived;
           delete product.name;
           delete product.group;
-          
-          groupedProducts = groupedProducts.map(item => {
-            item.weight = Number(item.weight)
-            return item
-          })
 
           product.groupedProducts = _.orderBy(groupedProducts, ["weight"], ["desc"]);
         }
