@@ -185,6 +185,7 @@ const fetchProductsForShop = async ctx => {
           delete product.isArchived;
           delete product.name;
           delete product.group;
+          product.weight = Number(product.weight)
 
           product.groupedProducts = _.orderBy(groupedProducts, ["weight"], ["desc"]);
         }
@@ -291,6 +292,7 @@ const fetchProductForShop = async ctx => {
           delete product.isArchived;
           delete product.name;
           delete product.group;
+          product.weight = Number(product.weight)
 
           product.groupedProducts = _.orderBy(groupedProducts, ["weight"], ["desc"]);
         }
