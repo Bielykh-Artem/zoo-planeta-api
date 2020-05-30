@@ -49,8 +49,6 @@ const fetchProducts = async ctx => {
           $or: fields.map(field => ({ [field]: { $regex: searchStr, $options: "ig" } })),
         },
       },
-      { $skip: skip * limit },
-      { $limit: Number(limit) },
       {
         $redact: {
           $cond: [
@@ -105,6 +103,8 @@ const fetchProducts = async ctx => {
       {
         $replaceRoot: { newRoot: { $mergeObjects: [{ _id: "$_id" }, "$doc"] } },
       },
+      { $skip: skip * limit },
+      { $limit: Number(limit) },
     ];
 
     if (filters && filters.length) {
