@@ -23,7 +23,7 @@ const productSchema = new Schema({
   weight: { type: String, default: "" },
   brand: { type: Schema.ObjectId, ref: "Brand", required: true },
   newPacking: { type: Boolean, default: false },
-  bestseller: { type: Boolean, default: false },
+  ourchoice: { type: Boolean, default: false },
   group: {
     type: Schema.ObjectId,
     ref: "Group",
