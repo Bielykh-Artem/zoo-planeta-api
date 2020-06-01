@@ -23,6 +23,7 @@ const priceSchema = new Schema({
   isActive: { type: Boolean, required: true },
   isArchived: { type: Boolean, default: false },
   orderCount: { type: Number, default: 0 },
+  vendorСode: { type: String },
 });
 
 module.exports = mongoose.model("Price", priceSchema);
