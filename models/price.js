@@ -24,6 +24,7 @@ const priceSchema = new Schema({
   isArchived: { type: Boolean, default: false },
   orderCount: { type: Number, default: 0 },
   vendorСode: { type: String },
+  originSupplierCode: { type: String },
 });
 
 module.exports = mongoose.model("Price", priceSchema);
