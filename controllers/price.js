@@ -78,6 +78,7 @@ const bulkWritePrice = async ctx => {
       products.map(item => {
         item.id = new ObjectId();
         item.isArchived = false;
+        item.isCompleted = false;
 
         return {
           updateOne: {

@@ -9,10 +9,6 @@ const fetchProducts = async ctx => {
   const fields = ["name"];
   const populate = ["price"];
 
-  /**
-   * Product options
-   */
-
   const productOptions = {
     isArchived: false,
   };
@@ -21,24 +17,26 @@ const fetchProducts = async ctx => {
     productOptions.isCompleted = JSON.parse(completed);
   }
 
-  if (supplier) {
+  if (brand) {
     productOptions.brand = new ObjectId(brand);
   }
-
-  /**
-   * Price options
-   */
 
   const priceOptions = {
     isArchived: false,
   };
 
+  const supplierOptions = {
+    isArchived: false,
+  }
+
+  const filtersMatch = {}
+
   if (supplier) {
-    priceOptions.supplier = new ObjectId(supplier);
+    filtersMatch["price.supplier._id"] = new ObjectId(supplier);
   }
 
   if (status !== undefined) {
-    priceOptions.isActive = JSON.parse(status);
+    filtersMatch["price.status"] = JSON.parse(status);
   }
 
   const aggregateQuery = [
@@ -59,7 +57,7 @@ const fetchProducts = async ctx => {
               from: "suppliers",
               let: { price_supplier: "$supplier" },
               pipeline: [
-                { $match: { $expr: { $and: [{ $eq: ["$_id", "$$price_supplier"] }] } } },
+                { $match: { $expr: { $and: [{ $eq: ["$_id", "$$price_supplier"] }, supplierOptions] } } },
                 {
                   $lookup: {
                     from: "users",
@@ -79,6 +77,7 @@ const fetchProducts = async ctx => {
       },
     },
     { $unwind: "$price" },
+    { $match: filtersMatch },
     { $skip: skip * limit },
     { $limit: Number(limit) },
   ];
