@@ -5,24 +5,40 @@ const { uploadImage } = require("../utils/AWS");
 const _ = require("lodash");
 
 const fetchProducts = async ctx => {
-  const { skip = 0, limit = 1000000, search = "", completed, supplier } = ctx.query;
+  const { skip = 0, limit = 1000000, search = "", completed, supplier, brand, status } = ctx.query;
   const fields = ["name"];
   const populate = ["price"];
+
+  /**
+   * Product options
+   */
 
   const productOptions = {
     isArchived: false,
   };
 
   if (completed !== undefined) {
-    productOptions.isCompleted = completed;
+    productOptions.isCompleted = JSON.parse(completed);
   }
+
+  if (supplier) {
+    productOptions.brand = new ObjectId(brand);
+  }
+
+  /**
+   * Price options
+   */
 
   const priceOptions = {
     isArchived: false,
   };
 
   if (supplier) {
-    priceOptions.supplier = supplier;
+    priceOptions.supplier = new ObjectId(supplier);
+  }
+
+  if (status !== undefined) {
+    priceOptions.isActive = JSON.parse(status);
   }
 
   const aggregateQuery = [

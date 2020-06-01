@@ -23,7 +23,7 @@ const saveMainShopSeo = async ctx => {
             upsert: true,
           },
         };
-      })
+      }),
     );
 
     ctx.body = result;
