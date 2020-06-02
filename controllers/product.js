@@ -27,9 +27,9 @@ const fetchProducts = async ctx => {
 
   const supplierOptions = {
     isArchived: false,
-  }
+  };
 
-  const filtersMatch = {}
+  const filtersMatch = {};
 
   if (supplier) {
     filtersMatch["price.supplier._id"] = new ObjectId(supplier);

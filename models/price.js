@@ -23,7 +23,7 @@ const priceSchema = new Schema({
   isActive: { type: Boolean, required: true },
   isArchived: { type: Boolean, default: false },
   orderCount: { type: Number, default: 0 },
-  vendorСode: { type: String },
+  vendoreСode: { type: String },
   originSupplierCode: { type: String },
 });
 

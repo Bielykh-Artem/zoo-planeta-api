@@ -42,6 +42,7 @@ const bulkWritePrice = async ctx => {
       price.map(item => {
         item.id = new ObjectId();
         item.createdBy = user._id;
+        item.createdAt = new Date();
         item.isArchived = false;
         item.retailPrice = Number(item.retailPrice.replace(",", ""));
         item.wholesalePrice = Number(item.wholesalePrice.replace(",", ""));
@@ -79,6 +80,8 @@ const bulkWritePrice = async ctx => {
         item.id = new ObjectId();
         item.isArchived = false;
         item.isCompleted = false;
+        item.createdBy = user._id;
+        item.createdAt = new Date();
 
         return {
           updateOne: {

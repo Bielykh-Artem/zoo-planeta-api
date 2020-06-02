@@ -32,6 +32,8 @@ const productSchema = new Schema({
     },
   },
   isArchived: false,
+  supplierCode: { type: String, required: true },
+  supplier: { type: Schema.ObjectId, ref: "Supplier", required: true },
 });
 
 module.exports = mongoose.model("Product", productSchema);
